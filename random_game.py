@@ -1,11 +1,20 @@
+#-------------------------------------------------------------------------------
+#---------------------------------GENERAL PARAMS--------------------------------
+#-------------------------------------------------------------------------------
+
+verbose = False
+counting = False 
+num_games = 100000
+
 #--------------------------------------------------------------------------------
 #--------------------------------TABLE OF CHOICES--------------------------------
 #--------------------------------------------------------------------------------
 god_table = [None]*37
+# god_table_mid_game = [None]*19
 #choices
 h = "Hit"       #hit
 d = "DobleDown" #double down
-s = "Stay"      #stay
+s = "Stand"     #stand
 p = "Split"     #split
 #EASY 1
 god_table[0] = [h]*10                               #3
@@ -50,6 +59,8 @@ god_table[34] = [p]*10                              #8,8   (16)
 god_table[35] = [s] + [p]*5 + [s] + [p]*2 + [s]     #9,9   (18)
 god_table[36] = [s]*10                              #10,10 (20)
 
+# god_table_mid_game = god_table[0:19]
+
 player_value_dictionary = {0:"3", 1:"4", 2:"5", 3:"6", 4:"7", 5:"8", 6:"9", 7:"10", 8:"11", 9:"12", 10:"13", 11:"14", 12:"15", 13:"16", 14:"17", 15:"18", 16:"19", 17:"20", 18:"21", 19:"A,2", 20:"A,3", 21:"A,4", 22:"A,5", 23:"A,6", 24:"A,7", 25:"A,8", 26:"A,9", 27:"A,A", 28:"2,2", 29:"3,3", 30:"4,4", 31:"5,5", 32:"6,6", 33:"7,7", 34:"8,8", 35:"9,9", 36:"10,10"}
 # for i in range(len(god_table)):
 #     print(f"{player_value_dictionary[i]}[{i}]: {god_table[i]}")
@@ -85,27 +96,164 @@ def shuffle_deck(deck):
     random.shuffle(deck)
     return deck
 
-initial_deck = shuffle_deck(deck_pairs_no_seeds)
+#---------------------------------------------------------------------------
+#---------------------------------GAME DEMO---------------------------------
+#---------------------------------------------------------------------------
+def play_game():
+    initial_deck = shuffle_deck(deck_pairs_no_seeds)
 
-# print(initial_deck)
-first_dealer = initial_deck[1]
-print("dealer's card:", first_dealer)
-second_dealer = initial_deck[3]
-# print("hidden card:", second_dealer)
-first_player = initial_deck[0]
-second_player = initial_deck[2]
-print("player's cards:", first_player, second_player)
-    
-#let's active the flags with the player's value
-ace_flag = False
-double_flag = False
-player_value = first_player + second_player 
-if first_player == second_player: # A,A-10,10 
-    double_flag = True
-elif first_player == 1 or second_player == 1: # A,2-A,9
-    if player_value == 11:
-        player_value = 21 # Blackjack
+    # print(initial_deck)
+    dealer_card = []
+    player_card = []
+    dealer_card.append(initial_deck[1])
+    if verbose:
+        print("dealer's card:", dealer_card[0])
+    dealer_card.append(initial_deck[3])
+    # print("hidden card:", second_dealer)
+    player_card.append(initial_deck[0])
+    player_card.append(initial_deck[2])
+    if verbose:
+        print("player's cards:", player_card[0], player_card[1])
+        
+    #let's active the flags with the player's value
+    ace_flag = False
+    double_flag = False
+    player_value = sum(player_card)
+    if player_card[0] == player_card[1]: # A,A-10,10 
+        double_flag = True
+    elif 1 in player_card: # A,2-A,9
+        #here we have two cases: 
+        # - 21 as A,10
+        # - A,2-A,9
+        if player_value == 11:
+            player_value = 21 # Blackjack
+        else:
+            ace_flag = True  
+
+    choice = table_choice(player_value, dealer_card[0], ace_flag, double_flag)
+    if verbose:
+        print("first choice:", choice)
+
+    # ACTIONS
+    # - Hit: draw another card
+    # - Double Down: double the bet and draw one more card
+    # - Stand: keep the current hand and end the turn
+    # - Split: split the cards into two hands if they are of the same value
+
+    count = 0
+
+    #Player's turn
+    if verbose:
+        print("Player's turn:")
+    while choice != "Stand":
+        if choice == "Hit":
+            player_card.append(initial_deck[4+count])  # Simulating drawing a new card
+            if verbose:
+                print("New card drawn:", player_card[-1])
+            player_value = sum(player_card)
+            if verbose:
+                print("New player value:", player_value)
+            if player_value > 21:
+                if verbose:
+                    print("Player busts!")
+                break
+            
+        elif choice == "DobleDown":
+            player_card.append(initial_deck[4+count])  # Simulating drawing a new card
+            if verbose:
+                print("New card drawn:", player_card[-1])
+            player_value = sum(player_card)
+            if verbose:
+                print("New player value after double down:", player_value)
+            if player_value > 21:
+                if verbose:
+                    print("Player busts after double down!")
+                break
+            
+        elif choice == "Split":
+            if verbose:
+                print("Splitting the hand is not implemented in this demo.")
+            break
+        
+        # Re-evaluate the choice after the action
+        ace_flag = False
+        double_flag = False
+        if 1 in player_card and player_value-1<=10: #we're checking if the sum of all the cards but the ace is less than or equal to 10, so we can count the ace as 11
+            if player_value == 11:
+                player_value = 21 # Blackjack
+            else:
+                ace_flag = True
+
+        choice = table_choice(player_value, dealer_card[0], ace_flag, double_flag)
+        if verbose:
+            print("Next choice:", choice)
+        count += 1  # Increment count to simulate drawing new cards
+
+    if 1 in player_card and player_value-1<=10: #we're checking if the sum of all the cards but the ace is less than or equal to 10, so we can count the ace as 11
+        player_value = player_value + 10
+    if verbose:
+        print("Final player value:", player_value)
+        print()
+
+    # Dealer's turn
+    if verbose:
+        print("Dealer's turn:")
+        print("Dealer's cards:", dealer_card)
+    dealer_value = sum(dealer_card)
+    if 1 in dealer_card and dealer_value-1<=10: #we're checking if the sum of all the cards but the ace is less than or equal to 10, so we can count the ace as 11
+        dealer_value = dealer_value + 10
+    while dealer_value < 17:
+        dealer_card.append(initial_deck[4+count])  # Simulating drawing a new card
+        if verbose:
+            print("New dealer card drawn:", dealer_card[-1])
+        dealer_value = sum(dealer_card)
+        if verbose:
+            print("New dealer value:", dealer_value)
+        count += 1  # Increment count to simulate drawing new cards
+    if dealer_value > 21:
+        if verbose:
+            print("Dealer busts!")
     else:
-        ace_flag = True  
+        if verbose:
+            print("Final dealer value:", dealer_value)
+    if verbose:
+        print()
 
-print("obvious choice:", table_choice(player_value, first_dealer, ace_flag, double_flag))
+    # Determine the winner
+    if player_value > 21:
+        if verbose:
+            print("Dealer wins! Player busts.")
+            print()
+        return -1
+    elif dealer_value > 21 or player_value > dealer_value:
+        if verbose:
+            print("Player wins!")
+            print()
+        return 1
+    elif player_value < dealer_value:
+        if verbose:
+            print("Dealer wins!")
+            print()
+        return -1
+    else:
+        if verbose:
+            print("It's a tie!")
+            print()
+        return 0
+
+player = 0
+dealer = 0
+tie = 0
+for _ in range(num_games):  # Play the game 100 times
+    result = play_game()
+    if result == 1:
+        player += 1
+    elif result == -1:
+        dealer += 1
+    else:
+        tie += 1 
+
+print(f"Game results after {num_games} rounds:")
+print(f"Player wins: {player}, Dealer wins: {dealer}, Ties: {tie}")
+print(f"Player win percentage: {player/(player+dealer)*100:.2f}%") #47.85%
+print(f"Player win percentage counting ties: {player/(player+dealer+tie)*100:.2f}%") #43.50%
