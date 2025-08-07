@@ -1,10 +1,15 @@
 #-------------------------------------------------------------------------------
 #---------------------------------GENERAL PARAMS--------------------------------
 #-------------------------------------------------------------------------------
+import random
 
 verbose = False
 counting = False 
-num_games = 100000
+num_games = 1000000
+counting_value = 0
+deck_idx = 0
+final = False
+black_card = 0
 
 #--------------------------------------------------------------------------------
 #--------------------------------TABLE OF CHOICES--------------------------------
@@ -47,7 +52,7 @@ god_table[23] = [h]*2 + [d]*4 + [h]*4               #A,6 (7)
 god_table[24] = [h] + [s] + [d]*4 + [s]*2 + [h]*2   #A,7 (8)
 god_table[25] = [s]*10                              #A,8 (9)
 god_table[26] = [s]*10                              #A,9 (10)
-#DOUBLES
+#SAME
 god_table[27] = [p]*10                              #A,A   (2)
 god_table[28] = [h] + [p]*6 + [h]*3                 #2,2   (4)
 god_table[29] = [h] + [p]*6 + [h]*3                 #3,3   (6)
@@ -65,18 +70,32 @@ player_value_dictionary = {0:"3", 1:"4", 2:"5", 3:"6", 4:"7", 5:"8", 6:"9", 7:"1
 # for i in range(len(god_table)):
 #     print(f"{player_value_dictionary[i]}[{i}]: {god_table[i]}")
 
-def table_choice(player_value, dealer_card, ace_flag=False, double_flag=False):
+def table_choice(player_value, dealer_card, ace_flag=False, same_flag=False):
     #if there is an ace, we pass values 3-10, with ace_flag=True
-    #if there are doubles, we pass values 2-20, with double_flag=True
+    #if there are same, we pass values 2-20, with same_flag=True
     if player_value == 21:  # Blackjack
         return god_table[player_value-3][dealer_card - 1]
     elif ace_flag: #we are interested in rows 19-26
         return god_table[19 + player_value - 3][dealer_card - 1]
-    elif double_flag: #we are interested in rows 27-36
-        assert player_value%2 == 0, "Player value must be even for doubles."
+    elif same_flag: #we are interested in rows 27-36
+        assert player_value%2 == 0, "Player value must be even for same."
         return god_table[27 + player_value//2 - 1][dealer_card - 1]
     else: #we are interested in rows 0-18
         return god_table[player_value-3][dealer_card - 1]
+    
+#-------------------------------------------------------------------------------
+#------------------------------------COUNTING-----------------------------------
+#-------------------------------------------------------------------------------
+
+counting_dictionary = {
+    "2": 1, "3": 1, "4": 1, "5": 1, "6": 1,
+    "7": 0, "8": 0, "9": 0,
+    "10": -1, "1": -1
+}
+
+def count_card(card):
+    global counting_value
+    counting_value += counting_dictionary[card]
 
 #---------------------------------------------------------------------------
 #--------------------------------DECK CODING--------------------------------
@@ -92,35 +111,48 @@ values_dictionary = {"2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9"
 deck_pairs_no_seeds = [values_dictionary[value] for value in values_string]*4*6
 
 def shuffle_deck(deck):
-    import random
     random.shuffle(deck)
     return deck
 
 #---------------------------------------------------------------------------
 #---------------------------------GAME DEMO---------------------------------
 #---------------------------------------------------------------------------
-def play_game():
-    initial_deck = shuffle_deck(deck_pairs_no_seeds)
-
+def play_game(deck):
+    global deck_idx
+    global final
+    global counting_value
     # print(initial_deck)
     dealer_card = []
     player_card = []
-    dealer_card.append(initial_deck[1])
+    # first player's card
+    player_card.append(deck[deck_idx])
+    deck_idx += 1
+    if deck_idx == black_card:
+        final = True
+    # first dealer's card
+    dealer_card.append(deck[deck_idx])
+    deck_idx += 1
+    if deck_idx == black_card:
+        final = True
     if verbose:
         print("dealer's card:", dealer_card[0])
-    dealer_card.append(initial_deck[3])
-    # print("hidden card:", second_dealer)
-    player_card.append(initial_deck[0])
-    player_card.append(initial_deck[2])
+    # second player's card
+    player_card.append(deck[2])
     if verbose:
         print("player's cards:", player_card[0], player_card[1])
+    # second dealer's card
+    dealer_card.append(deck[deck_idx])
+    deck_idx += 1
+    if deck_idx == black_card:
+        final = True
+    # print("hidden card:", second_dealer)
         
     #let's active the flags with the player's value
     ace_flag = False
-    double_flag = False
+    same_flag = False
     player_value = sum(player_card)
     if player_card[0] == player_card[1]: # A,A-10,10 
-        double_flag = True
+        same_flag = True
     elif 1 in player_card: # A,2-A,9
         #here we have two cases: 
         # - 21 as A,10
@@ -130,7 +162,7 @@ def play_game():
         else:
             ace_flag = True  
 
-    choice = table_choice(player_value, dealer_card[0], ace_flag, double_flag)
+    choice = table_choice(player_value, dealer_card[0], ace_flag, same_flag)
     if verbose:
         print("first choice:", choice)
 
@@ -147,7 +179,10 @@ def play_game():
         print("Player's turn:")
     while choice != "Stand":
         if choice == "Hit":
-            player_card.append(initial_deck[4+count])  # Simulating drawing a new card
+            player_card.append(deck[deck_idx])  # Simulating drawing a new card
+            deck_idx += 1
+            if deck_idx == black_card:
+                final = True
             if verbose:
                 print("New card drawn:", player_card[-1])
             player_value = sum(player_card)
@@ -159,7 +194,10 @@ def play_game():
                 break
             
         elif choice == "DobleDown":
-            player_card.append(initial_deck[4+count])  # Simulating drawing a new card
+            player_card.append(deck[deck_idx])  # Simulating drawing a new card
+            deck_idx += 1
+            if deck_idx == black_card:
+                final = True
             if verbose:
                 print("New card drawn:", player_card[-1])
             player_value = sum(player_card)
@@ -177,17 +215,16 @@ def play_game():
         
         # Re-evaluate the choice after the action
         ace_flag = False
-        double_flag = False
+        same_flag = False
         if 1 in player_card and player_value-1<=10: #we're checking if the sum of all the cards but the ace is less than or equal to 10, so we can count the ace as 11
             if player_value == 11:
                 player_value = 21 # Blackjack
             else:
                 ace_flag = True
 
-        choice = table_choice(player_value, dealer_card[0], ace_flag, double_flag)
+        choice = table_choice(player_value, dealer_card[0], ace_flag, same_flag)
         if verbose:
             print("Next choice:", choice)
-        count += 1  # Increment count to simulate drawing new cards
 
     if 1 in player_card and player_value-1<=10: #we're checking if the sum of all the cards but the ace is less than or equal to 10, so we can count the ace as 11
         player_value = player_value + 10
@@ -203,7 +240,7 @@ def play_game():
     if 1 in dealer_card and dealer_value-1<=10: #we're checking if the sum of all the cards but the ace is less than or equal to 10, so we can count the ace as 11
         dealer_value = dealer_value + 10
     while dealer_value < 17:
-        dealer_card.append(initial_deck[4+count])  # Simulating drawing a new card
+        dealer_card.append(deck[4+count])  # Simulating drawing a new card
         if verbose:
             print("New dealer card drawn:", dealer_card[-1])
         dealer_value = sum(dealer_card)
@@ -220,12 +257,16 @@ def play_game():
         print()
 
     # Determine the winner
+    # first, let's check if there are blackjacks
+    blackjack = (len(player_card)==2) and (1 in player_card) and (10 in player_card)
+    dealer_blackjack = (len(dealer_card)==2) and (1 in dealer_card) and (10 in dealer_card)
+    # let's determine now the winner
     if player_value > 21:
         if verbose:
             print("Dealer wins! Player busts.")
             print()
         return -1
-    elif dealer_value > 21 or player_value > dealer_value:
+    elif dealer_value > 21 or player_value > dealer_value or (blackjack and not dealer_blackjack):
         if verbose:
             print("Player wins!")
             print()
@@ -244,16 +285,24 @@ def play_game():
 player = 0
 dealer = 0
 tie = 0
+actual_deck = shuffle_deck(deck_pairs_no_seeds) 
+black_card = random.randint(3*52, 4*52)
 for _ in range(num_games):  # Play the game 100 times
-    result = play_game()
+    result = play_game(actual_deck)
     if result == 1:
         player += 1
     elif result == -1:
         dealer += 1
     else:
         tie += 1 
+    if final == True:
+        actual_deck = shuffle_deck(deck_pairs_no_seeds) 
+        black_card = random.randint(3*52, 4*52)
+        deck_idx = 0
+        final = False
+        counting_value = 0
 
 print(f"Game results after {num_games} rounds:")
 print(f"Player wins: {player}, Dealer wins: {dealer}, Ties: {tie}")
-print(f"Player win percentage: {player/(player+dealer)*100:.2f}%") #47.85%
-print(f"Player win percentage counting ties: {player/(player+dealer+tie)*100:.2f}%") #43.50%
+print(f"Player win percentage: {player/(player+dealer)*100:.2f}%") #48.72%
+print(f"Player win percentage counting ties: {player/(player+dealer+tie)*100:.2f}%") #44.32%
