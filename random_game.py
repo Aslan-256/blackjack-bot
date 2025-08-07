@@ -129,11 +129,15 @@ def play_game(deck):
     deck_idx += 1
     if deck_idx == black_card:
         final = True
+        if verbose:
+            print("Black card founded, last game before shuffle.")
     # first dealer's card
     dealer_card.append(deck[deck_idx])
     deck_idx += 1
     if deck_idx == black_card:
         final = True
+        if verbose:
+            print("Black card founded, last game before shuffle.")
     if verbose:
         print("dealer's card:", dealer_card[0])
     # second player's card
@@ -145,6 +149,8 @@ def play_game(deck):
     deck_idx += 1
     if deck_idx == black_card:
         final = True
+        if verbose:
+            print("Black card founded, last game before shuffle.")
     # print("hidden card:", second_dealer)
         
     #let's active the flags with the player's value
@@ -183,6 +189,8 @@ def play_game(deck):
             deck_idx += 1
             if deck_idx == black_card:
                 final = True
+                if verbose:
+                    print("Black card founded, last game before shuffle.")
             if verbose:
                 print("New card drawn:", player_card[-1])
             player_value = sum(player_card)
@@ -198,6 +206,8 @@ def play_game(deck):
             deck_idx += 1
             if deck_idx == black_card:
                 final = True
+                if verbose:
+                    print("Black card founded, last game before shuffle.")
             if verbose:
                 print("New card drawn:", player_card[-1])
             player_value = sum(player_card)
