@@ -1,5 +1,4 @@
 #TODO:
-# - Understand why splitting doesn't work
 # - implement bust stop, avoiding dealers turn in case of player busting
 # - understand why I'm loosing money
 
@@ -30,7 +29,7 @@ split_bet = [bet, bet]
 #--------------------------------TABLE OF CHOICES--------------------------------
 #--------------------------------------------------------------------------------
 god_table = [None]*37
-no_split_table = [None]*37
+split_table = [None]*37
 
 #choices
 h = "Hit"       #hit
@@ -83,25 +82,25 @@ god_table[36] = [s]*10                              #10,10 (20)
 
 ## NO SPLIT TABLE
 #first 26 rows are equal to god_table ones
-no_split_table = god_table
+split_table = god_table.copy()
 #let's remove split choices substituting them with the row corresponding to the normal value 
-no_split_table[27] = god_table[9]                        #A,A   (2)  #NO SPLIT -> look at 12 (there is no 2-row) -> index 9
-no_split_table[28] = god_table[1]                        #2,2   (4)  #NO SPLIT -> look at 4 -> index 1
-no_split_table[29] = god_table[3]                        #3,3   (6)  #NO SPLIT -> look at 6 -> index 3
-no_split_table[30] = god_table[5]                        #4,4   (8)  #NO SPLIT -> look at 8 -> index 5
-no_split_table[31] = god_table[31]                       #5,5   (10) 
-no_split_table[32] = god_table[9]                        #6,6   (12) #NO SPLIT -> look at 12 -> index 9
-no_split_table[33] = god_table[11]                        #7,7   (14) #NO SPLIT -> look at 14 -> index 11
-no_split_table[34] = god_table[13]                        #8,8   (16) #NO SPLIT -> look at 16 -> index 13
-no_split_table[35] = god_table[15]                        #9,9   (18) #NO SPLIT -> look at 18 -> index 15
-no_split_table[36] = [s]*10                              #10,10 (20)
+split_table[27] = god_table[9]                        #A,A   (2)  #NO SPLIT -> look at 12 (there is no 2-row) -> index 9
+split_table[28] = god_table[1]                        #2,2   (4)  #NO SPLIT -> look at 4 -> index 1
+split_table[29] = god_table[3]                        #3,3   (6)  #NO SPLIT -> look at 6 -> index 3
+split_table[30] = god_table[5]                        #4,4   (8)  #NO SPLIT -> look at 8 -> index 5
+split_table[31] = god_table[31]                       #5,5   (10) 
+split_table[32] = god_table[9]                        #6,6   (12) #NO SPLIT -> look at 12 -> index 9
+split_table[33] = god_table[11]                        #7,7   (14) #NO SPLIT -> look at 14 -> index 11
+split_table[34] = god_table[13]                        #8,8   (16) #NO SPLIT -> look at 16 -> index 13
+split_table[35] = god_table[15]                        #9,9   (18) #NO SPLIT -> look at 18 -> index 15
+split_table[36] = [s]*10                              #10,10 (20)
 
 def table_choice(player_value, dealer_card, ace_flag=False, same_flag=False, splitted=False):
     #let's assign the table
     if not splitted:
         table = god_table
     else:
-        table = no_split_table
+        table = split_table
 
     #if there is an ace, we pass values 3-10, with ace_flag=True
     #if there are same, we pass values 2-20, with same_flag=True
@@ -126,10 +125,10 @@ counting_dictionary = {
 }
 
 def counting_to_bet_percentage(counting_value):
-    if counting_value <= 0.4:
+    if counting_value <= 1:
         return 1
     else:
-        return counting_value*3 
+        return counting_value 
 
 def count_card(card):
     global counting_value
@@ -223,6 +222,7 @@ def play_game(deck):
             print("Black card founded, last game before shuffle.")
     if verbose:
         print("player's cards:", player_card)
+    
     # second dealer's card
     actual_card = deck[deck_idx]
     dealer_card.append(actual_card)
@@ -299,10 +299,10 @@ def play_game(deck):
             split_bet = [bet, bet]
             if verbose:
                 print(f"Betting another {bet} after a split")
-            hand = [player_card[0], player_card[1]]
+            hand = [[player_card[0]], [player_card[1]]]
             # second card on hand[1]
             actual_card = deck[deck_idx]
-            hand[1].append(actual_card)
+            hand[0].append(actual_card)
             count_card(actual_card)
             true_counting()
             deck_idx += 1
@@ -312,7 +312,7 @@ def play_game(deck):
                     print("Black card founded, last game before shuffle.")
             # second card on hand[2]
             actual_card = deck[deck_idx]
-            hand[2].append(actual_card)
+            hand[1].append(actual_card)
             count_card(actual_card)
             true_counting()
             deck_idx += 1
@@ -322,8 +322,8 @@ def play_game(deck):
                     print("Black card founded, last game before shuffle.")
             if verbose:
                 print("Split hands created:")
-                print("Hand 1:", hand[1])
-                print("Hand 2:", hand[2])
+                print("Hand 1:", hand[0])
+                print("Hand 2:", hand[1])
             for hand_idx in range(2):
                 #let's active the flags and spot 21
                 player_value = sum(hand[hand_idx])
