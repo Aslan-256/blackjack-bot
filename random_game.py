@@ -277,6 +277,8 @@ def play_game(deck):
                 break
         elif choice == "DobleDown":
             bet *= 2 
+            if verbose:
+                print(f"Betting {bet} after double down")
             actual_card = deck[deck_idx]
             player_card.append(actual_card)  # Simulating drawing a new card
             count_card(actual_card)
