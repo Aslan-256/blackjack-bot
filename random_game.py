@@ -1,15 +1,27 @@
+#TODO:
+# - Implement the split action
+# - Understand why counting is not working properly: after 1000000 games, the player has -2 times the initial money
+
 #-------------------------------------------------------------------------------
-#---------------------------------GENERAL PARAMS--------------------------------
+#--------------------------------GLOBAL VARIABLES-------------------------------
 #-------------------------------------------------------------------------------
 import random
 
+# VERSIONS
 verbose = False
-counting = False 
+counting = True 
+
+# PARAMETERS
 num_games = 1000000
+
+# INITIALIZATION
 counting_value = 0
 deck_idx = 0
 final = False
 black_card = 0
+player_money = 1000000
+chip = player_money // 1000     # 1000 chips of 1 unit each
+bet = chip                      # Initial bet is 1 chip
 
 #--------------------------------------------------------------------------------
 #--------------------------------TABLE OF CHOICES--------------------------------
@@ -88,14 +100,33 @@ def table_choice(player_value, dealer_card, ace_flag=False, same_flag=False):
 #-------------------------------------------------------------------------------
 
 counting_dictionary = {
-    "2": 1, "3": 1, "4": 1, "5": 1, "6": 1,
-    "7": 0, "8": 0, "9": 0,
-    "10": -1, "1": -1
+    2: 1, 3: 1, 4: 1, 5: 1, 6: 1,
+    7: 0, 8: 0, 9: 0,
+    10: -1, 1: -1
 }
+
+def counting_to_bet_percentage(counting_value):
+    if counting_value <= 0.1:
+        return 1
+    else:
+        return counting_value*10
 
 def count_card(card):
     global counting_value
     counting_value += counting_dictionary[card]
+
+def true_counting():
+    global counting_value
+    if deck_idx < 52:
+        counting_value /= 6
+    elif deck_idx < 104:
+        counting_value /= 5
+    elif deck_idx < 156:
+        counting_value /= 4
+    elif deck_idx < 208:
+        counting_value /= 3
+    else:
+        counting_value /= 2
 
 #---------------------------------------------------------------------------
 #--------------------------------DECK CODING--------------------------------
@@ -121,18 +152,25 @@ def play_game(deck):
     global deck_idx
     global final
     global counting_value
+    global bet
     # print(initial_deck)
     dealer_card = []
     player_card = []
+    actual_card = deck[deck_idx]
     # first player's card
-    player_card.append(deck[deck_idx])
+    player_card.append(actual_card)
+    count_card(actual_card)
+    true_counting()
     deck_idx += 1
     if deck_idx == black_card:
         final = True
         if verbose:
             print("Black card founded, last game before shuffle.")
     # first dealer's card
-    dealer_card.append(deck[deck_idx])
+    actual_card = deck[deck_idx]
+    dealer_card.append(actual_card)
+    count_card(actual_card)
+    true_counting()
     deck_idx += 1
     if deck_idx == black_card:
         final = True
@@ -145,7 +183,10 @@ def play_game(deck):
     if verbose:
         print("player's cards:", player_card[0], player_card[1])
     # second dealer's card
-    dealer_card.append(deck[deck_idx])
+    actual_card = deck[deck_idx]
+    dealer_card.append(actual_card)
+    count_card(actual_card)
+    true_counting()
     deck_idx += 1
     if deck_idx == black_card:
         final = True
@@ -185,7 +226,10 @@ def play_game(deck):
         print("Player's turn:")
     while choice != "Stand":
         if choice == "Hit":
-            player_card.append(deck[deck_idx])  # Simulating drawing a new card
+            actual_card = deck[deck_idx]
+            player_card.append(actual_card)  # Simulating drawing a new card
+            count_card(actual_card)
+            true_counting()
             deck_idx += 1
             if deck_idx == black_card:
                 final = True
@@ -200,9 +244,12 @@ def play_game(deck):
                 if verbose:
                     print("Player busts!")
                 break
-            
         elif choice == "DobleDown":
-            player_card.append(deck[deck_idx])  # Simulating drawing a new card
+            bet *= 2 
+            actual_card = deck[deck_idx]
+            player_card.append(actual_card)  # Simulating drawing a new card
+            count_card(actual_card)
+            true_counting()
             deck_idx += 1
             if deck_idx == black_card:
                 final = True
@@ -298,13 +345,31 @@ tie = 0
 actual_deck = shuffle_deck(deck_pairs_no_seeds) 
 black_card = random.randint(3*52, 4*52)
 for _ in range(num_games):  # Play the game 100 times
+    if counting:
+        if verbose:
+            print(f"Counting value: {counting_value}")
+            print()
+        bet = int(counting_to_bet_percentage(counting_value)) * chip
+        if verbose:
+            if int(counting_to_bet_percentage(counting_value)) >= 2:
+                print(f"Betting {bet}")
+            else:
+                print("Betting 1000")    
+            print()
     result = play_game(actual_deck)
     if result == 1:
         player += 1
+        if counting:
+            player_money += bet
     elif result == -1:
         dealer += 1
+        if counting:
+            player_money -= bet
     else:
         tie += 1 
+    if counting and verbose:
+        print(f"Player's money: {player_money}")
+        print()
     if final == True:
         actual_deck = shuffle_deck(deck_pairs_no_seeds) 
         black_card = random.randint(3*52, 4*52)
@@ -316,3 +381,4 @@ print(f"Game results after {num_games} rounds:")
 print(f"Player wins: {player}, Dealer wins: {dealer}, Ties: {tie}")
 print(f"Player win percentage: {player/(player+dealer)*100:.2f}%") #48.72%
 print(f"Player win percentage counting ties: {player/(player+dealer+tie)*100:.2f}%") #44.32%
+print(f"Player money: {player_money}")
