@@ -1,6 +1,6 @@
 from enum import Enum
 
-from src.card import Card
+from card import Card
 
 class Action(Enum):
     HIT = 0
@@ -34,7 +34,7 @@ table = [
     [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],  # 18
     [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],  # 19
     [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],  # 20
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]  # 21
+    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]   # 21
 ]
 ace_table = [
     [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],  # A,2
@@ -44,7 +44,7 @@ ace_table = [
     [0, 0, 1, 1, 1, 1, 0, 0, 0, 0],  # A,6
     [0, 2, 1, 1, 1, 1, 2, 2, 0, 0],  # A,7
     [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],  # A,8
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]  # A,9
+    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]   # A,9
 ]
 split_table = [
     [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],  # A,A
@@ -56,7 +56,7 @@ split_table = [
     [0, 3, 3, 3, 3, 3, 3, 0, 0, 0],  # 7,7
     [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],  # 8,8
     [2, 3, 3, 3, 3, 3, 2, 3, 3, 2],  # 9,9
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]  # 10,10
+    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]   # 10,10
 ]
 no_split_table = [
     table[9],
@@ -115,3 +115,6 @@ class Player:
 
     def is_busted(self):
         return self.get_hand_value() > 21
+    
+    def has_blackjack(self):
+        return self.get_hand_value() == 21 and len(self._hand) == 2 and not self.__splitted

@@ -1,7 +1,7 @@
 from typing import override
 
-from src.card import Card
-from src.player import Player
+from card import Card
+from player import Player
 
 class Dealer(Player):
     def __init__(self):

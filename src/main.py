@@ -1,4 +1,4 @@
-from src.table import GreenTable
+from greentable import GreenTable
 
 def main():
     for i in range(1000000):

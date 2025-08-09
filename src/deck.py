@@ -1,6 +1,6 @@
 import random
 
-from src.card import Card
+from card import Card
 
 class Deck:
     def __init__(self):
@@ -12,11 +12,10 @@ class Deck:
                 self.__cards.append(Card(10))
         self.__idx = 0
         self.__black_idx = 0
-        self.reset_deck()
-
+        self.shuffle_deck()
         self.__counting = 0
 
-    def get_card(self) -> Card:
+    def draw_card(self) -> Card:
         out = self.__cards[self.__idx]
         self.__idx += 1
 
@@ -30,10 +29,10 @@ class Deck:
 
         return out
 
-    def is_black(self) -> bool:
+    def need_to_shuffle(self) -> bool:
         return self.__idx >= self.__black_idx
 
-    def reset_deck(self):
+    def shuffle_deck(self):
         random.shuffle(self.__cards)
         self.__idx = 0
         self.__black_idx = random.randint(3 * 52, 4 * 52)
