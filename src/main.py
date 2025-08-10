@@ -1,11 +1,11 @@
 from greentable import GreenTable
 
 def main():
-    green_table = GreenTable(verbose = True)
+    green_table = GreenTable(verbose = False)
     wins = 0
     losses = 0
     ties = 0
-    green_table.start_game(1000)
+    green_table.start_game(10000)
     results = green_table.get_results()
 
     for result in results:
@@ -17,9 +17,13 @@ def main():
             else:
                 ties += 1
 
+    player_money = green_table.players[0].get_money()
+
     print(f"\n\nTotal Wins: {wins}, Losses: {losses}, Ties: {ties}")
     print(f"Win Rate: {wins / (wins + losses + ties) * 100:.2f}%")
     print(f"Win rate without ties: {wins / (wins + losses) * 100:.2f}%")
+    print(f"Player's final money: {player_money}")
+
 
 if __name__ == '__main__':
     main()

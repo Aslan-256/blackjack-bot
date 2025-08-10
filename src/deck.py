@@ -19,14 +19,13 @@ class Deck:
     def draw_card(self) -> Card:
         out = self.__cards[self.__idx]
         self.__idx += 1
-
-        match out.get_value():
-            case 2, 3, 4, 5, 6:
-                self.__counting += 1
-            case 1, 10:
-                self.__counting -= 1
-            case _:
-                pass
+        value = out.get_value()
+        if value in [2, 3, 4, 5, 6]:
+            self.__counting += 1
+        elif value in [1, 10]:
+            self.__counting -= 1
+        else:
+            pass
 
         return out
 
@@ -37,6 +36,10 @@ class Deck:
         random.shuffle(self.__cards)
         self.__idx = 0
         self.__black_idx = random.randint(3 * 52, 4 * 52)
+        self.__counting = 0
+
+    def get_counting(self) -> int:
+        return self.__counting
 
     def get_true_count(self) -> float:
         if self.__idx <= 52:

@@ -2,12 +2,6 @@ from enum import Enum
 
 from card import Card
 
-class Action(Enum):
-    HIT = 0
-    DOUBLE = 1
-    STAND = 2
-    SPLIT = 3
-
 # 0 = hit
 # 1 = double
 # 2 = stand
@@ -72,13 +66,15 @@ no_split_table = [
 ]
 
 class Player:
-    def __init__(self, splitted: bool = False, name = "Player"):
+    def __init__(self, splitted: bool = False, name = "Player", money = 1000, bet = 1):
         self._hand: list[Card] = []
         self.__splitted = splitted
         self.name = name
+        self.__money = money
+        self.__bet = bet
 
     def reset(self):
-        self._hand = []
+        self._hand: list[Card] = []
         self.__splitted = False
 
     def get_hand_value(self):
@@ -86,6 +82,18 @@ class Player:
 
     def get_list_of_cards(self):
         return [card.get_value() for card in self._hand]
+    
+    def get_money(self):
+        return self.__money
+    
+    def get_bet(self):
+        return self.__bet
+    
+    def set_money(self, money: int):
+        self.__money = money
+    
+    def set_bet(self, bet: int):
+        self.__bet = bet
 
     def __same_cards(self):
         return self._hand[0].get_value() == self._hand[1].get_value()
