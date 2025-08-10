@@ -1,23 +1,23 @@
 from greentable import GreenTable
 
 def main():
-    green_table = GreenTable(verbose=True)
+    green_table = GreenTable(verbose = True)
     wins = 0
     losses = 0
     ties = 0
-    for i in range(50):
-        results = green_table.start_game()
-        if green_table.verbose:
-            print(f"Game {i + 1} results: {results}")
-            print()
-        for result in results:
-            if result == 1:
+    green_table.start_game(1000)
+    results = green_table.get_results()
+
+    for result in results:
+        for p in result:
+            if p == 1:
                 wins += 1
-            elif result == -1:
+            elif p == -1:
                 losses += 1
             else:
                 ties += 1
-    print(f"Total Wins: {wins}, Losses: {losses}, Ties: {ties}")
+
+    print(f"\n\nTotal Wins: {wins}, Losses: {losses}, Ties: {ties}")
     print(f"Win Rate: {wins / (wins + losses + ties) * 100:.2f}%")
     print(f"Win rate without ties: {wins / (wins + losses) * 100:.2f}%")
 
