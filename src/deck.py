@@ -5,11 +5,12 @@ from card import Card
 class Deck:
     def __init__(self):
         self.__cards: list[Card] = []
-        for i in range(6):
-            for j in range(1, 11):  # Cards from 1 to 10
-                self.__cards.append(Card(j))
-            for _ in range(3):  # Adding J, Q, K
-                self.__cards.append(Card(10))
+        for i in range(6): # 6 decks
+            for j in range(4): # 4 seeds
+                for j in range(1, 11):  # Cards from 1 to 10
+                    self.__cards.append(Card(j))
+                for _ in range(3):  # Adding J, Q, K
+                    self.__cards.append(Card(10))
         self.__idx = 0
         self.__black_idx = 0
         self.shuffle_deck()

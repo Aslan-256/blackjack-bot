@@ -77,6 +77,10 @@ class Player:
         self.__splitted = splitted
         self._name = name
 
+    def reset(self):
+        self._hand = []
+        self.__splitted = False
+
     def get_hand_value(self):
         return sum(card.get_value() for card in self._hand)
 
@@ -86,12 +90,11 @@ class Player:
     def __same_cards(self):
         return self._hand[0].get_value() == self._hand[1].get_value()
 
-    def __has_ace(self):
+    def _has_ace(self):
         return any(card.get_value() == 1 for card in self._hand)
 
     def add_card(self, card: Card):
         self._hand.append(card)
-        print(f"{self._name} added card:", card.get_value())
 
     def play(self, dealer_card: Card, ) -> int:
 
@@ -100,7 +103,9 @@ class Player:
                 return no_split_table[self.get_hand_value() // 2 - 1][dealer_card.get_value() - 1]
             return split_table[self.get_hand_value() // 2 - 1][dealer_card.get_value() - 1]
 
-        if self.__has_ace():
+        if self._has_ace():
+            if self.get_hand_value() == 11:
+                return 2
             if self.get_hand_value() > 10:
                 return table[self.get_hand_value() - 3][dealer_card.get_value() - 1]
             return ace_table[self.get_hand_value() - 3][dealer_card.get_value() - 1]
