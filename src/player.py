@@ -1,4 +1,5 @@
 from card import Card
+from hand import Hand
 
 # 0 = hit
 # 1 = double
@@ -64,77 +65,78 @@ no_split_table = [
 ]
 
 class Player:
-    def __init__(self, splitted: bool = False, name = "Player", money = 1000, bet = 1):
-        self._hand: list[Card] = []
+    def __init__(self, splitted: bool = False, name = "Player", money = 1000):
+        self.hands: list[Hand] = [Hand()]
         self.__splitted = splitted
         self.name = name
         self.__money = money
-        self.__bet = bet
+        self.__basic_bet = 1
 
     def reset(self):
-        self._hand: list[Card] = []
+        self.hands: list[Hand] = [Hand([], self.__basic_bet)]
         self.__splitted = False
 
-    def get_hand_value(self):
-        return sum(card.get_value() for card in self._hand)
-    
-    def get_final_hand_value(self):
-        value = self.get_hand_value()
-        if self._has_ace() and value <= 11:
-            return value + 10
-        return value
+    def get_hand(self) -> Hand:
+        return self.hands[0] if self.hands else None
 
-    def get_list_of_cards(self):
-        return [card.get_value() for card in self._hand]
+    # def get_hand_value(self):
+    #     return sum(card.get_value() for card in self._hand)
+    
+    # def get_final_hand_value(self):
+    #     value = self.get_hand_value()
+    #     if self._has_ace() and value <= 11:
+    #         return value + 10
+    #     return value
+
+    # def get_list_of_cards(self):
+    #     return [card.get_value() for card in self._hand]
     
     def get_money(self):
         return self.__money
     
-    def get_bet(self):
-        return self.__bet
+    def get_basic_bet(self):
+        return self.__basic_bet
     
     def set_money(self, money: int):
         self.__money = money
     
-    def set_bet(self, bet: int):
+    def set_basic_bet(self, bet: int):
         self.__bet = bet
 
-    def __same_cards(self):
-        return self._hand[0].get_value() == self._hand[1].get_value()
+    # def __same_cards(self):
+    #     return self._hand[0].get_value() == self._hand[1].get_value()
 
-    def _has_ace(self):
-        return any(card.get_value() == 1 for card in self._hand)
+    # def _has_ace(self):
+    #     return any(card.get_value() == 1 for card in self._hand)
 
-    def add_card(self, card: Card):
-        self._hand.append(card)
+    # def add_card(self, card: Card):
+    #     self._hand.append(card)
 
-    def play(self, dealer_card: Card, ) -> int:
+    def play(self, player_hand: Hand, dealer_card: Card) -> int:
 
-        if len(self._hand) == 2 and self.__same_cards():
+        if len(player_hand.get_list_of_cards()) == 2 and player_hand.same_cards():
             if self.__splitted:
-                return no_split_table[self.get_hand_value() // 2 - 1][dealer_card.get_value() - 1]
-            return split_table[self.get_hand_value() // 2 - 1][dealer_card.get_value() - 1]
+                return no_split_table[player_hand.get_hard_value() // 2 - 1][dealer_card.get_value() - 1]
+            return split_table[player_hand.get_hard_value() // 2 - 1][dealer_card.get_value() - 1]
 
-        if self._has_ace():
-            if self.get_hand_value() == 11:
+        if player_hand.has_ace():
+            if player_hand.get_hard_value() == 11:
                 return 2
-            if self.get_hand_value() > 10:
-                return table[self.get_hand_value() - 3][dealer_card.get_value() - 1]
-            return ace_table[self.get_hand_value() - 3][dealer_card.get_value() - 1]
+            if player_hand.get_hard_value() > 10:
+                return table[player_hand.get_hard_value() - 3][dealer_card.get_value() - 1]
+            return ace_table[player_hand.get_hard_value() - 3][dealer_card.get_value() - 1]
 
-        return table[self.get_hand_value() - 3][dealer_card.get_value() - 1]
+        return table[player_hand.get_hard_value() - 3][dealer_card.get_value() - 1]
 
     def split(self):
         self.__splitted = True
-        new_player = Player(True)
-        new_player.add_card(self._hand.pop())
-        return new_player
+        self.hands.append(Hand([self.hands[0].get_second_card()], self.hands[0].get_bet()))
+        
+    # def is_busted(self):
+    #     return self.get_hand_value() > 21
 
-    def is_busted(self):
-        return self.get_hand_value() > 21
-
-    def has_blackjack(self):
-        return 1 in self.get_list_of_cards() and 10 in self.get_list_of_cards() and len(self._hand) == 2 and not self.__splitted
+    def has_blackjack(self, hand: Hand) -> bool:
+        return 1 in hand.get_list_of_cards() and 10 in hand.get_list_of_cards() and len(hand.get_list_of_cards()) == 2 and not self.__splitted
     
     def is_splitted(self):
         return self.__splitted

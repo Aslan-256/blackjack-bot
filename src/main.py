@@ -1,11 +1,11 @@
 from greentable import GreenTable
 
 def main():
-    green_table = GreenTable(verbose = True)
+    green_table = GreenTable(verbose = False)
     wins = 0
     losses = 0
     ties = 0
-    green_table.start_game(30)
+    green_table.start_game(1000000)
     results = green_table.get_results()
 
     for result in results:
