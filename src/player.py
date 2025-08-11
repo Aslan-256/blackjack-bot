@@ -1,5 +1,3 @@
-from enum import Enum
-
 from card import Card
 
 # 0 = hit
@@ -17,7 +15,7 @@ table = [
 
     [0, 0, 1, 1, 1, 1, 0, 0, 0, 0],  # 9
     [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],  # 10
-    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1],  # 11
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],  # 11
     [0, 0, 0, 2, 2, 2, 0, 0, 0, 0],  # 12
     [0, 2, 2, 2, 2, 2, 0, 0, 0, 0],  # 13
     [0, 2, 2, 2, 2, 2, 0, 0, 0, 0],  # 14
@@ -36,8 +34,8 @@ ace_table = [
     [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],  # A,4
     [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],  # A,5
     [0, 0, 1, 1, 1, 1, 0, 0, 0, 0],  # A,6
-    [0, 2, 1, 1, 1, 1, 2, 2, 0, 0],  # A,7
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],  # A,8
+    [0, 1, 1, 1, 1, 1, 2, 2, 0, 0],  # A,7
+    [2, 2, 2, 2, 2, 1, 2, 2, 2, 2],  # A,8
     [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]  # A,9
 ]
 split_table = [
@@ -45,7 +43,7 @@ split_table = [
     [0, 3, 3, 3, 3, 3, 3, 0, 0, 0],  # 2,2
     [0, 3, 3, 3, 3, 3, 3, 0, 0, 0],  # 3,3
     [0, 0, 0, 0, 3, 3, 0, 0, 0, 0],  # 4,4
-    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1],  # 5,5
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],  # 5,5
     [0, 3, 3, 3, 3, 3, 0, 0, 0, 0],  # 6,6
     [0, 3, 3, 3, 3, 3, 3, 0, 0, 0],  # 7,7
     [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],  # 8,8
@@ -131,3 +129,24 @@ class Player:
 
     def has_blackjack(self):
         return self.get_hand_value() == 21 and len(self._hand) == 2 and not self.__splitted
+    
+    def test_table(self):
+        # pritn for all pairs of cards the table row
+        for i in range(1, 11):
+            for j in range(1, 11):
+                print(f"{i}, {j}: ", end='')
+                for k in range(1, 11):
+                    dealer_card = Card(k)
+                    self._hand = [Card(i), Card(j)]
+                    print(f"{self.play(dealer_card)}", end=' ')
+                print()
+
+'''
+# simple test to check the table correctness
+
+test_player = Player()
+test_player.test_table()
+
+test_player = Player(splitted=True)
+test_player.test_table()
+'''

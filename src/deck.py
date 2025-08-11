@@ -42,12 +42,15 @@ class Deck:
         return self.__counting
 
     def get_true_count(self) -> float:
+        return self.__counting / self.get_deck_remaining() 
+    
+    def get_deck_remaining(self) -> int:
         if self.__idx <= 52:
-            return self.__counting / 6
+            return 6
         if self.__idx <= 104:
-            return self.__counting / 5
+            return 5
         if self.__idx <= 156:
-            return self.__counting / 4
+            return 4
         if self.__idx <= 208:
-            return self.__counting / 3
-        return self.__counting / 2
+            return 3
+        return 2

@@ -1,11 +1,11 @@
 from greentable import GreenTable
 
 def main():
-    green_table = GreenTable(verbose = False)
+    green_table = GreenTable(verbose = True)
     wins = 0
     losses = 0
     ties = 0
-    green_table.start_game(10000)
+    green_table.start_game(100)
     results = green_table.get_results()
 
     for result in results:
@@ -29,5 +29,4 @@ if __name__ == '__main__':
     main()
 
 # TODO:
-# - count
-# - money bet
+# - playing deviation based on true count
