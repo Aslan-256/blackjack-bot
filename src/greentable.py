@@ -3,6 +3,7 @@ from colorama import Fore
 from dealer import Dealer
 from deck import Deck
 from player import Player
+from card import Card
 
 RESET = "\x1b[0m"
 BOLD = "\x1b[1m"
@@ -26,12 +27,13 @@ class GreenTable:
             if player.is_busted():
                 player.set_money(player.get_money() - self.__bet)
                 results.append(-1)
-            elif self.dealer.is_busted() or player.get_hand_value() > self.dealer.get_hand_value() or (player.has_blackjack() and not self.dealer.has_blackjack()):
+            elif self.dealer.is_busted() or player.get_final_hand_value() > self.dealer.get_final_hand_value() or (player.has_blackjack() and not self.dealer.has_blackjack()):
                 player.set_money(player.get_money() + self.__bet)
                 if player.has_blackjack():
+                    self.log(f"{player.name} has a {BOLD}{Fore.BLUE}BLACKJACK{RESET}!")
                     player.set_money(player.get_money() + int(self.__bet * 0.5))
                 results.append(1)
-            elif player.get_hand_value() < self.dealer.get_hand_value() or (self.dealer.has_blackjack() and not player.has_blackjack()):
+            elif player.get_final_hand_value() < self.dealer.get_final_hand_value() or (self.dealer.has_blackjack() and not player.has_blackjack()):
                 player.set_money(player.get_money() - self.__bet)
                 results.append(-1)
             else:
@@ -74,6 +76,13 @@ class GreenTable:
             self.dealer.add_card(self.deck.draw_card())
             self.players[0].add_card(self.deck.draw_card())
             self.dealer.add_card(self.deck.draw_card())
+
+            # Uncomment to test with specific cards
+            # self.players[0].add_card(Card(9))
+            # self.dealer.add_card(Card(9))
+            # self.players[0].add_card(Card(1))
+            # self.dealer.add_card(Card(1))
+
             self.log(f"Dealer: {Fore.BLUE}{self.dealer.get_known_card().get_value()}{RESET}\n"
                      f"Player: {Fore.BLUE}{self.players[0].get_list_of_cards()}{RESET}")
 
@@ -111,6 +120,9 @@ class GreenTable:
                     p.add_card(self.deck.draw_card())
                     self.log(f"{p.name} {BOLD}{Fore.RED}HIT{RESET}. --> {Fore.BLUE}{p.get_list_of_cards()}{RESET}")
                 case 1:  # Double Down
+                    if p.is_splitted():
+                        # TODO: handle double down after split in term of bet, idea: bet = [] list of at most two integers
+                        pass
                     self.set_table_bet(p.get_bet() * 2)
                     p.add_card(self.deck.draw_card())
                     self.log(f"{p.name} {BOLD}{Fore.RED}DOUBLE DOWN{RESET}. Bet: {Fore.CYAN}{self.__bet}{RESET} --> {Fore.BLUE}{p.get_list_of_cards()}{RESET}")
@@ -125,6 +137,7 @@ class GreenTable:
                     self.players[-1].add_card(self.deck.draw_card())
                     remaining_players = 1
                     self.log(f"{p.name} {BOLD}{Fore.RED}SPLIT{RESET}. Bet: {Fore.CYAN}{self.__bet}{RESET} --> {Fore.BLUE}{p.get_list_of_cards()}{RESET}, {Fore.BLUE}{self.players[-1].get_list_of_cards()}{RESET}")
+                    self.log(f"{Fore.GREEN}{BOLD}---PLAYER TURN {RESET}{Fore.BLUE}{p.get_list_of_cards()}{Fore.GREEN}{BOLD}---{RESET}")
         return remaining_players
 
     def log(self, message: str):
@@ -136,4 +149,5 @@ class GreenTable:
     
     def get_player_money(self):
         return [p.get_money() for p in self.players]
+
     

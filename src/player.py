@@ -77,6 +77,12 @@ class Player:
 
     def get_hand_value(self):
         return sum(card.get_value() for card in self._hand)
+    
+    def get_final_hand_value(self):
+        value = self.get_hand_value()
+        if self._has_ace() and value <= 11:
+            return value + 10
+        return value
 
     def get_list_of_cards(self):
         return [card.get_value() for card in self._hand]
@@ -128,7 +134,10 @@ class Player:
         return self.get_hand_value() > 21
 
     def has_blackjack(self):
-        return self.get_hand_value() == 21 and len(self._hand) == 2 and not self.__splitted
+        return 1 in self.get_list_of_cards() and 10 in self.get_list_of_cards() and len(self._hand) == 2 and not self.__splitted
+    
+    def is_splitted(self):
+        return self.__splitted
     
     def test_table(self):
         # pritn for all pairs of cards the table row
