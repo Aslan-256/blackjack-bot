@@ -64,6 +64,9 @@ no_split_table = [
     split_table[9]
 ]
 
+
+            
+
 class Player:
     def __init__(self, splitted: bool = False, name = "Player", money = 1000):
         self.hands: list[Hand] = [Hand()]
@@ -79,18 +82,6 @@ class Player:
     def get_hand(self) -> Hand:
         return self.hands[0] if self.hands else None
 
-    # def get_hand_value(self):
-    #     return sum(card.get_value() for card in self._hand)
-    
-    # def get_final_hand_value(self):
-    #     value = self.get_hand_value()
-    #     if self._has_ace() and value <= 11:
-    #         return value + 10
-    #     return value
-
-    # def get_list_of_cards(self):
-    #     return [card.get_value() for card in self._hand]
-    
     def get_money(self):
         return self.__money
     
@@ -102,15 +93,6 @@ class Player:
     
     def set_basic_bet(self, bet: int):
         self.__bet = bet
-
-    # def __same_cards(self):
-    #     return self._hand[0].get_value() == self._hand[1].get_value()
-
-    # def _has_ace(self):
-    #     return any(card.get_value() == 1 for card in self._hand)
-
-    # def add_card(self, card: Card):
-    #     self._hand.append(card)
 
     def play(self, player_hand: Hand, dealer_card: Card) -> int:
 
@@ -132,14 +114,63 @@ class Player:
         self.__splitted = True
         self.hands.append(Hand([self.hands[0].get_second_card()], self.hands[0].get_bet()))
         
-    # def is_busted(self):
-    #     return self.get_hand_value() > 21
-
     def has_blackjack(self, hand: Hand) -> bool:
         return 1 in hand.get_list_of_cards() and 10 in hand.get_list_of_cards() and len(hand.get_list_of_cards()) == 2 and not self.__splitted
     
     def is_splitted(self):
         return self.__splitted
+    
+    def playing_deviation(self, true_count: float, player_hand: Hand, dealer_card: Card) -> int:
+        player_cards = player_hand.get_list_of_cards()
+        dealer_card_value = dealer_card.get_value()
+        # split table
+        if len(player_cards)==2 and player_hand.same_cards() and Card(10) in player_cards and not self.__splitted:
+            if (dealer_card_value == 4 and true_count >= 6) or \
+                (dealer_card_value == 5 and true_count >= 5) or \
+                (dealer_card_value == 6 and true_count >= 4):
+                return 3 # split
+        # ace table
+        elif player_hand.has_ace() and player_hand.get_hard_value() <= 10:
+            if player_hand.get_hard_value() == 9:
+                if (dealer_card_value == 4 and true_count >= 3) or \
+                    (dealer_card_value == 5 and true_count >= 1):
+                    return 1 # double down
+                if dealer_card_value == 6 and true_count <= 0:
+                    return 2 # stand
+            if player_hand.get_hard_value() == 7:
+                if dealer_card_value==2 and true_count >= 1:
+                    return 1 # double down
+        # normal table
+        else:
+            if player_hand.get_hard_value() == 16:
+                if (dealer_card_value == 10 and true_count >= 0) or \
+                    (dealer_card_value == 9 and true_count >= 4) or \
+                    (dealer_card_value == 1 and true_count >= 3):
+                    return 2 # stand
+            if player_hand.get_hard_value() == 15:
+                if (dealer_card_value == 10 and true_count >= 4) or \
+                    (dealer_card_value == 1 and true_count >= 5):
+                    return 2 # stand
+            if player_hand.get_hard_value() == 13 and dealer_card_value == 2 and true_count <= -1:
+                return 0 # hit
+            if player_hand.get_hard_value() == 12:
+                if (dealer_card_value == 2 and true_count >= 3) or \
+                    (dealer_card_value == 3 and true_count >= 2):
+                    return 2 # stand
+                if dealer_card_value == 4 and true_count <= 0:
+                    return 0 # hit
+            if player_hand.get_hard_value() == 10:
+                if (dealer_card_value == 10 and true_count >= 4) or \
+                    (dealer_card_value == 1 and true_count >= 3):
+                    return 1 # double down
+            if player_hand.get_hard_value() == 9:
+                if (dealer_card_value == 2 and true_count >= 1) or \
+                    (dealer_card_value == 7 and true_count >= 3):
+                    return 1 # double down
+            if player_hand.get_hard_value() == 8:
+                if dealer_card_value == 6 and true_count >= 2:
+                    return 1 # double down
+        return self.play(player_hand, dealer_card) 
     
     def test_table(self):
         # pritn for all pairs of cards the table row

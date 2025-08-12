@@ -118,7 +118,10 @@ class GreenTable:
             if h.is_busted():
                 self.log(f"{p.name} busted.")
                 break
-            action = p.play(h, self.dealer.get_known_card())
+            if p.name == "Dealer": 
+                action = p.dealer_play()
+            else:
+                action = p.playing_deviation(self.deck.get_true_count(), h, self.dealer.get_known_card())
             match action:
                 case 0:  # Hit
                     h.add_card(self.deck.draw_card())
