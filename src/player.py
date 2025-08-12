@@ -6,50 +6,57 @@ from hand import Hand
 # 2 = stand
 # 3 = split
 
+Hi = 0 # hit
+D = 1 # double down
+St = 2 # stand
+Sp = 3 # split
+Dh = 4 # double or hit
+Ds = 5 # double or stand
+
 table = [
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # 3
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # 4
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # 5
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # 6
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # 7
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # 8
+    [Hi, Hi, Hi, Hi, Hi, Hi, Hi, Hi, Hi, Hi],  # 3
+    [Hi, Hi, Hi, Hi, Hi, Hi, Hi, Hi, Hi, Hi],  # 4
+    [Hi, Hi, Hi, Hi, Hi, Hi, Hi, Hi, Hi, Hi],  # 5
+    [Hi, Hi, Hi, Hi, Hi, Hi, Hi, Hi, Hi, Hi],  # 6
+    [Hi, Hi, Hi, Hi, Hi, Hi, Hi, Hi, Hi, Hi],  # 7
+    [Hi, Hi, Hi, Hi, Hi, Hi, Hi, Hi, Hi, Hi],  # 8
 
-    [0, 0, 1, 1, 1, 1, 0, 0, 0, 0],  # 9
-    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],  # 10
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],  # 11
-    [0, 0, 0, 2, 2, 2, 0, 0, 0, 0],  # 12
-    [0, 2, 2, 2, 2, 2, 0, 0, 0, 0],  # 13
-    [0, 2, 2, 2, 2, 2, 0, 0, 0, 0],  # 14
-    [0, 2, 2, 2, 2, 2, 0, 0, 0, 0],  # 15
-    [0, 2, 2, 2, 2, 2, 0, 0, 0, 0],  # 16
+    [Hi, Hi, Dh, Dh, Dh, Dh, Hi, Hi, Hi, Hi],  # 9
+    [Hi, Dh, Dh, Dh, Dh, Dh, Dh, Dh, Dh, Hi],  # 10
+    [Dh, Dh, Dh, Dh, Dh, Dh, Dh, Dh, Dh, Dh],  # 11
+    [Hi, Hi, Hi, St, St, St, Hi, Hi, Hi, Hi],  # 12
+    [Hi, St, St, St, St, St, Hi, Hi, Hi, Hi],  # 13
+    [Hi, St, St, St, St, St, Hi, Hi, Hi, Hi],  # 14
+    [Hi, St, St, St, St, St, Hi, Hi, Hi, Hi],  # 15
+    [Hi, St, St, St, St, St, Hi, Hi, Hi, Hi],  # 16
 
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],  # 17
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],  # 18
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],  # 19
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],  # 20
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]  # 21
+    [St, St, St, St, St, St, St, St, St, St],  # 17
+    [St, St, St, St, St, St, St, St, St, St],  # 18
+    [St, St, St, St, St, St, St, St, St, St],  # 19
+    [St, St, St, St, St, St, St, St, St, St],  # 2Hi
+    [St, St, St, St, St, St, St, St, St, St]  # 21
 ]
 ace_table = [
-    [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],  # A,2
-    [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],  # A,3
-    [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],  # A,4
-    [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],  # A,5
-    [0, 0, 1, 1, 1, 1, 0, 0, 0, 0],  # A,6
-    [0, 1, 1, 1, 1, 1, 2, 2, 0, 0],  # A,7
-    [2, 2, 2, 2, 2, 1, 2, 2, 2, 2],  # A,8
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]  # A,9
+    [Hi, Hi, Hi, Hi, Dh, Dh, Hi, Hi, Hi, Hi],  # A,2
+    [Hi, Hi, Hi, Hi, Dh, Dh, Hi, Hi, Hi, Hi],  # A,3
+    [Hi, Hi, Hi, Dh, Dh, Dh, Hi, Hi, Hi, Hi],  # A,4
+    [Hi, Hi, Hi, Dh, Dh, Dh, Hi, Hi, Hi, Hi],  # A,5
+    [Hi, Hi, Dh, Dh, Dh, Dh, Hi, Hi, Hi, Hi],  # A,6
+    [Hi, Ds, Ds, Ds, Ds, Ds, St, St, Hi, Hi],  # A,7
+    [St, St, St, St, St, Ds, St, St, St, St],  # A,8
+    [St, St, St, St, St, St, St, St, St, St]  # A,9
 ]
 split_table = [
-    [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],  # A,A
-    [0, 3, 3, 3, 3, 3, 3, 0, 0, 0],  # 2,2
-    [0, 3, 3, 3, 3, 3, 3, 0, 0, 0],  # 3,3
-    [0, 0, 0, 0, 3, 3, 0, 0, 0, 0],  # 4,4
-    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],  # 5,5
-    [0, 3, 3, 3, 3, 3, 0, 0, 0, 0],  # 6,6
-    [0, 3, 3, 3, 3, 3, 3, 0, 0, 0],  # 7,7
-    [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],  # 8,8
-    [2, 3, 3, 3, 3, 3, 2, 3, 3, 2],  # 9,9
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]  # 10,10
+    [Sp, Sp, Sp, Sp, Sp, Sp, Sp, Sp, Sp, Sp],  # A,A
+    [Hi, Sp, Sp, Sp, Sp, Sp, Sp, Hi, Hi, Hi],  # 2,2
+    [Hi, Sp, Sp, Sp, Sp, Sp, Sp, Hi, Hi, Hi],  # 3,3
+    [Hi, Hi, Hi, Hi, Sp, Sp, Hi, Hi, Hi, Hi],  # 4,4
+    [Hi, Dh, Dh, Dh, Dh, Dh, Dh, Dh, Dh, Hi],  # 5,5
+    [Hi, Sp, Sp, Sp, Sp, Sp, Hi, Hi, Hi, Hi],  # 6,6
+    [Hi, Sp, Sp, Sp, Sp, Sp, Sp, Hi, Hi, Hi],  # 7,7
+    [Sp, Sp, Sp, Sp, Sp, Sp, Sp, Sp, Sp, Sp],  # 8,8
+    [St, Sp, Sp, Sp, Sp, Sp, St, Sp, Sp, St],  # 9,9
+    [St, St, St, St, St, St, St, St, St, St]  # 10,10
 ]
 no_split_table = [
     table[9],
@@ -108,18 +115,19 @@ class Player:
                 action = table[player_hand.get_hard_value() - 3][dealer_card.get_value() - 1]
             else:
                 action = ace_table[player_hand.get_hard_value() - 3][dealer_card.get_value() - 1]
-                # avoid double down if player has more than 2 cards
-                if action == 1 and len(player_hand.get_list_of_cards()) > 2:
-                    if player_hand.get_hard_value() == 8 or player_hand.get_hard_value() == 9:
-                        action = 2 # stand
-                    else:
-                        action = 0 # hit
         else:
             action = table[player_hand.get_hard_value() - 3][dealer_card.get_value() - 1]
-            # avoid double down if player has more than 2 cards
-            if action == 1 and len(player_hand.get_list_of_cards()) > 2:
-                action = 0 # hit
 
+        # avoid double down if player has more than 2 cards
+        if len(player_hand.get_list_of_cards()) > 2:
+            if action == Dh:
+                action = Hi
+            elif action == Ds:
+                action = St
+        else:
+            if action in (Dh, Ds):
+                action = D
+        
         return action
 
     def split(self):
@@ -136,6 +144,7 @@ class Player:
         return self.__splitted
     
     def playing_deviation(self, true_count: float, player_hand: Hand, dealer_card: Card) -> int:
+        action = -1
         player_cards = player_hand.get_list_of_cards()
         dealer_card_value = dealer_card.get_value()
         # split table
@@ -143,49 +152,62 @@ class Player:
             if (dealer_card_value == 4 and true_count >= 6) or \
                 (dealer_card_value == 5 and true_count >= 5) or \
                 (dealer_card_value == 6 and true_count >= 4):
-                return 3 # split
+                action = Sp 
         # ace table
         elif player_hand.has_ace() and player_hand.get_hard_value() <= 10:
             if player_hand.get_hard_value() == 9:
                 if (dealer_card_value == 4 and true_count >= 3) or \
                     (dealer_card_value == 5 and true_count >= 1):
-                    return 1 # double down
-                if dealer_card_value == 6 and true_count <= 0:
-                    return 2 # stand
-            if player_hand.get_hard_value() == 7:
+                    action = Ds
+                elif dealer_card_value == 6 and true_count <= 0:
+                    action = St
+            elif player_hand.get_hard_value() == 7:
                 if dealer_card_value==2 and true_count >= 1:
-                    return 1 # double down
+                    action = Dh
         # normal table
         else:
             if player_hand.get_hard_value() == 16:
                 if (dealer_card_value == 10 and true_count >= 0) or \
                     (dealer_card_value == 9 and true_count >= 4) or \
                     (dealer_card_value == 1 and true_count >= 3):
-                    return 2 # stand
-            if player_hand.get_hard_value() == 15:
+                    action = St
+            elif player_hand.get_hard_value() == 15:
                 if (dealer_card_value == 10 and true_count >= 4) or \
                     (dealer_card_value == 1 and true_count >= 5):
-                    return 2 # stand
-            if player_hand.get_hard_value() == 13 and dealer_card_value == 2 and true_count <= -1:
-                return 0 # hit
-            if player_hand.get_hard_value() == 12:
+                    action = St
+            elif player_hand.get_hard_value() == 13 and dealer_card_value == 2 and true_count <= -1:
+                action = Hi
+            elif player_hand.get_hard_value() == 12:
                 if (dealer_card_value == 2 and true_count >= 3) or \
                     (dealer_card_value == 3 and true_count >= 2):
-                    return 2 # stand
-                if dealer_card_value == 4 and true_count <= 0:
-                    return 0 # hit
-            if player_hand.get_hard_value() == 10:
+                    action = St
+                elif dealer_card_value == 4 and true_count <= 0:
+                    action = Hi
+            elif player_hand.get_hard_value() == 10:
                 if (dealer_card_value == 10 and true_count >= 4) or \
                     (dealer_card_value == 1 and true_count >= 3):
-                    return 1 # double down
-            if player_hand.get_hard_value() == 9:
+                    action = Dh
+            elif player_hand.get_hard_value() == 9:
                 if (dealer_card_value == 2 and true_count >= 1) or \
                     (dealer_card_value == 7 and true_count >= 3):
-                    return 1 # double down
-            if player_hand.get_hard_value() == 8:
+                    action = Dh
+            elif player_hand.get_hard_value() == 8:
                 if dealer_card_value == 6 and true_count >= 2:
-                    return 1 # double down
-        return self.play(player_hand, dealer_card) 
+                    action = Dh
+        if action == -1:
+            action = self.play(player_hand, dealer_card) 
+
+        # avoid double down if player has more than 2 cards
+        if len(player_hand.get_list_of_cards()) > 2:
+            if action == Dh:
+                action = Hi
+            elif action == Ds:
+                action = St
+        else:
+            if action in (Dh, Ds):
+                action = D
+
+        return action
     
     def test_table(self):
         # pritn for all pairs of cards the table row
