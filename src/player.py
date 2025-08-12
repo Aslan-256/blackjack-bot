@@ -85,14 +85,14 @@ class Player:
     def get_money(self):
         return self.__money
     
-    def get_basic_bet(self):
+    def get_basic_bet(self) -> int:
         return self.__basic_bet
     
     def set_money(self, money: int):
         self.__money = money
     
     def set_basic_bet(self, bet: int):
-        self.__bet = bet
+        self.__basic_bet = bet
 
     def play(self, player_hand: Hand, dealer_card: Card) -> int:
 
@@ -112,7 +112,10 @@ class Player:
 
     def split(self):
         self.__splitted = True
-        self.hands.append(Hand([self.hands[0].get_second_card()], self.hands[0].get_bet()))
+        bet = self.hands[0].get_bet()
+        first_hand = Hand([self.hands[0].get_first_card()], bet)
+        second_hand = Hand([self.hands[0].get_second_card()], bet)
+        self.hands = [first_hand, second_hand]
         
     def has_blackjack(self, hand: Hand) -> bool:
         return 1 in hand.get_list_of_cards() and 10 in hand.get_list_of_cards() and len(hand.get_list_of_cards()) == 2 and not self.__splitted

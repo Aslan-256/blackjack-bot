@@ -40,3 +40,8 @@ class Hand:
 
     def is_busted(self):
         return self.get_hard_value() > 21
+    
+    def remove_last_card(self):
+        if self.__cards:
+            return self.__cards.pop()
+        return None

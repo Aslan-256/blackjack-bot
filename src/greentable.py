@@ -61,7 +61,9 @@ class GreenTable:
             else: # If there is no shuffle needed, we can leverage the counting to choose a better bet
                 true_count = self.deck.get_true_count()
                 if true_count >= 2:
-                    self.players[0].set_basic_bet(true_count)
+                    self.players[0].set_basic_bet(int(true_count))
+                else:
+                    self.players[0].set_basic_bet(1)
 
             # Reset players and dealer
             self.players[0].reset()
@@ -94,6 +96,7 @@ class GreenTable:
             while num_remaining_hands > 0:
                 # p = self.players[-1]
                 hand = self.players[0].hands[-1]
+                hand.set_bet(self.players[0].get_basic_bet())
                 self.log(f"{Fore.GREEN}{BOLD}---PLAYER TURN {RESET}{Fore.BLUE}{hand.get_list_of_cards()}{Fore.GREEN}{BOLD}---{RESET}")
                 num_remaining_hands -= 1
                 num_remaining_hands += self.__turn(self.players[0], hand)
@@ -105,8 +108,11 @@ class GreenTable:
 
             self.log(f"{Fore.GREEN}{BOLD}---GAME ENDED---{RESET}\n"
                      f"Dealer: {Fore.BLUE}{dealer_hand.get_list_of_cards()}{RESET}")
-            for j, hand in enumerate(self.players[0].hands):
-                self.log(f'Player\'s hand {j}: {Fore.BLUE}{hand.get_list_of_cards()}{RESET}')
+            if len(self.players[0].hands) > 1:
+                for j, hand in enumerate(self.players[0].hands):
+                    self.log(f'Player\'s hand {j}: {Fore.BLUE}{hand.get_list_of_cards()}{RESET}')
+            else:
+                self.log(f"Player: {Fore.BLUE}{player_hand.get_list_of_cards()}{RESET}")
 
             self.__results.append(self.__check_winners())
             self.log(f"Results: {Fore.BLUE}{self.__results[-1]}{RESET}\n"
@@ -114,37 +120,39 @@ class GreenTable:
 
     def __turn(self, p: Player, h: Hand) -> int:
         remaining_hands = 0
+        hand = h
         while True:
-            if h.is_busted():
+            if hand.is_busted():
                 self.log(f"{p.name} busted.")
                 break
             if p.name == "Dealer": 
                 action = p.dealer_play()
             else:
-                action = p.playing_deviation(self.deck.get_true_count(), h, self.dealer.get_known_card())
+                action = p.playing_deviation(self.deck.get_true_count(), hand, self.dealer.get_known_card())
             match action:
                 case 0:  # Hit
-                    h.add_card(self.deck.draw_card())
-                    self.log(f"{p.name} {BOLD}{Fore.RED}HIT{RESET}. --> {Fore.BLUE}{h.get_list_of_cards()}{RESET}")
+                    hand.add_card(self.deck.draw_card())
+                    self.log(f"{p.name} {BOLD}{Fore.RED}HIT{RESET}. --> {Fore.BLUE}{hand.get_list_of_cards()}{RESET}")
                 case 1:  # Double Down
                     if p.is_splitted():
                         # TODO: handle double down after split in term of bet, idea: bet = [] list of at most two integers
                         pass
-                    h.set_bet(h.get_bet() * 2)
-                    h.add_card(self.deck.draw_card())
-                    self.log(f"{p.name} {BOLD}{Fore.RED}DOUBLE DOWN{RESET}. Bet: {Fore.CYAN}{h.get_bet()}{RESET} --> {Fore.BLUE}{h.get_list_of_cards()}{RESET}")
+                    hand.set_bet(hand.get_bet() * 2)
+                    hand.add_card(self.deck.draw_card())
+                    self.log(f"{p.name} {BOLD}{Fore.RED}DOUBLE DOWN{RESET}. Bet: {Fore.CYAN}{hand.get_bet()}{RESET} --> {Fore.BLUE}{hand.get_list_of_cards()}{RESET}")
                     break
                 case 2:  # Stand
                     self.log(f"{p.name} {BOLD}{Fore.RED}STAND{RESET}.")
                     break
                 case 3:  # Split
-                    h.set_bet(h.get_bet() * 2)
+                    hand.set_bet(p.get_basic_bet())
                     p.split()
-                    h.add_card(self.deck.draw_card())
+                    hand = p.get_hand()  # Get the first hand after split
+                    hand.add_card(self.deck.draw_card())
                     self.players[0].hands[-1].add_card(self.deck.draw_card())
                     remaining_hands = 1
-                    self.log(f"{p.name} {BOLD}{Fore.RED}SPLIT{RESET}. Bet: {Fore.CYAN}{h.get_bet()}{RESET} --> {Fore.BLUE}{h.get_list_of_cards()}{RESET}, {Fore.BLUE}{p.hands[-1].get_list_of_cards()}{RESET}")
-                    self.log(f"{Fore.GREEN}{BOLD}---PLAYER TURN {RESET}{Fore.BLUE}{p.hands[-1].get_list_of_cards()}{Fore.GREEN}{BOLD}---{RESET}")
+                    self.log(f"{p.name} {BOLD}{Fore.RED}SPLIT{RESET}. Bet: {Fore.CYAN}{hand.get_bet()} * 2{RESET} --> {Fore.BLUE}{hand.get_list_of_cards()}{RESET}, {Fore.BLUE}{p.hands[-1].get_list_of_cards()}{RESET}")
+                    self.log(f"{Fore.GREEN}{BOLD}---PLAYER TURN {RESET}{Fore.BLUE}{hand.get_list_of_cards()}{Fore.GREEN}{BOLD}---{RESET}")
         return remaining_hands
 
     def log(self, message: str):
