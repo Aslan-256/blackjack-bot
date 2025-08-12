@@ -95,20 +95,32 @@ class Player:
         self.__basic_bet = bet
 
     def play(self, player_hand: Hand, dealer_card: Card) -> int:
-
+        action = 0
         if len(player_hand.get_list_of_cards()) == 2 and player_hand.same_cards():
             if self.__splitted:
-                return no_split_table[player_hand.get_hard_value() // 2 - 1][dealer_card.get_value() - 1]
-            return split_table[player_hand.get_hard_value() // 2 - 1][dealer_card.get_value() - 1]
-
-        if player_hand.has_ace():
+                action = no_split_table[player_hand.get_hard_value() // 2 - 1][dealer_card.get_value() - 1]
+            else:
+                action = split_table[player_hand.get_hard_value() // 2 - 1][dealer_card.get_value() - 1]
+        elif player_hand.has_ace():
             if player_hand.get_hard_value() == 11:
-                return 2
-            if player_hand.get_hard_value() > 10:
-                return table[player_hand.get_hard_value() - 3][dealer_card.get_value() - 1]
-            return ace_table[player_hand.get_hard_value() - 3][dealer_card.get_value() - 1]
+                action = 2 # stand
+            elif player_hand.get_hard_value() > 10:
+                action = table[player_hand.get_hard_value() - 3][dealer_card.get_value() - 1]
+            else:
+                action = ace_table[player_hand.get_hard_value() - 3][dealer_card.get_value() - 1]
+                # avoid double down if player has more than 2 cards
+                if action == 1 and len(player_hand.get_list_of_cards()) > 2:
+                    if player_hand.get_hard_value() == 8 or player_hand.get_hard_value() == 9:
+                        action = 2 # stand
+                    else:
+                        action = 0 # hit
+        else:
+            action = table[player_hand.get_hard_value() - 3][dealer_card.get_value() - 1]
+            # avoid double down if player has more than 2 cards
+            if action == 1 and len(player_hand.get_list_of_cards()) > 2:
+                action = 0 # hit
 
-        return table[player_hand.get_hard_value() - 3][dealer_card.get_value() - 1]
+        return action
 
     def split(self):
         self.__splitted = True

@@ -134,9 +134,6 @@ class GreenTable:
                     hand.add_card(self.deck.draw_card())
                     self.log(f"{p.name} {BOLD}{Fore.RED}HIT{RESET}. --> {Fore.BLUE}{hand.get_list_of_cards()}{RESET}")
                 case 1:  # Double Down
-                    if p.is_splitted():
-                        # TODO: handle double down after split in term of bet, idea: bet = [] list of at most two integers
-                        pass
                     hand.set_bet(hand.get_bet() * 2)
                     hand.add_card(self.deck.draw_card())
                     self.log(f"{p.name} {BOLD}{Fore.RED}DOUBLE DOWN{RESET}. Bet: {Fore.CYAN}{hand.get_bet()}{RESET} --> {Fore.BLUE}{hand.get_list_of_cards()}{RESET}")
